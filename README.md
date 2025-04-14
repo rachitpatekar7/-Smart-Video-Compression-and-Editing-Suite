@@ -1,6 +1,4 @@
-Here’s a GitHub README template for your project, using a suitable project title:
 
----
 
 # 🎬 Smart Video Compression and Editing Suite
 
