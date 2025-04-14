@@ -20,63 +20,63 @@ import tensorflow as tf
 st.markdown(
     """
     <style>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap');
 
-html, body, [class*="css"] {
-    font-family: 'Montserrat', sans-serif !important;
-}
+    html, body, [class*="css"] {
+        font-family: 'Montserrat', sans-serif !important;
+    }
 
-.toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    justify-content: center;
-}
+    .toolbar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
 
-.tool-button {
-    min-width: 250px;
-    padding: 14px 32px;
-    background-color: #111827;
-    color: #ffffff;
-    border: none;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 600;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-}
+    .tool-button {
+        width: 200px;
+        padding: 12px 20px;
+        background-color: #111827;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
 
-.tool-button:hover {
-    background-color: #facc15;
-    color: #111827;
-    transform: scale(1.03);
-}
+    .tool-button:hover {
+        background-color: #facc15;
+        color: #111827;
+        transform: scale(1.02);
+    }
 
-.selected-button {
-    background-color: #f97316 !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
-}
+    .selected-button {
+        background-color: #f97316 !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
+    }
 
-.stButton > button {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: bold;
-    border-radius: 10px;
-    padding: 12px 24px;
-    background-color: #0ea5e9;
-    color: #ffffff;
-    border: none;
-    transition: all 0.3s ease;
-}
+    .stButton > button {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: bold;
+        border-radius: 10px;
+        padding: 10px 24px;
+        background-color: #0ea5e9;
+        color: #ffffff;
+        border: none;
+        transition: all 0.3s ease;
+    }
 
-.stButton > button:hover {
-    background-color: #0369a1;
-    transform: scale(1.04);
-}
-</style>
+    .stButton > button:hover {
+        background-color: #0369a1;
+        transform: scale(1.04);
+    }
+    </style>
     """,
     unsafe_allow_html=True
 )
