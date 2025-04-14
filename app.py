@@ -261,7 +261,7 @@ if uploaded_file:
             with st.spinner("Extracting details from the video..."):
                 result = model.transcribe(temp_video_path)
                 transcript = result["text"]
-            st.text_area("Transcript:", transcript, height=200)
+            
             st.info("Analyzing the Video......")
             try:
                 gemini_model = genai.GenerativeModel("gemini-2.0-flash")
