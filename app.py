@@ -15,6 +15,144 @@ from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input
 from tensorflow.keras.models import Model
 import tensorflow as tf
+import streamlit as st
+
+# Custom CSS to improve the sidebar and buttons
+st.markdown("""
+    <style>
+        /* General sidebar styling */
+        .css-1d391kg {
+            background-color: #2a2d3b;  /* Dark background for sidebar */
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Title Styling */
+        .css-15l7d7h {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        /* Button Styling for sleekness and animations */
+        .stButton button {
+            background-color: #5e4b8b;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 15px;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stButton button:hover {
+            background-color: #5e4b8b;
+            box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .stButton button:focus {
+            outline: none;
+            border: 2px solid #f1f1f1;
+        }
+
+        /* Active Button Effect */
+        .stButton button:active {
+            background-color: #4a3a6a;
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+            transform: translateY(2px);
+        }
+
+        /* Sidebar scrollbar styling */
+        .css-1v3fvcr {
+            background-color: #2a2d3b;
+            border-radius: 10px;
+        }
+        
+        /* Section Styling for smooth transitions */
+        .css-vyf1rl {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .stTextArea textarea {
+            background-color: #2a2d3b;
+            color: white;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        /* Custom scrollbar for the sidebar */
+        .css-1k3s00p {
+            background-color: #2a2d3b;
+        }
+
+        /* Title text inside the sidebar */
+        .sidebar-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# Sidebar Setup
+st.sidebar.title("✨ Smart Video Editor")
+st.sidebar.markdown('<div class="sidebar-title">Choose a feature:</div>', unsafe_allow_html=True)
+
+# Button selection for features
+tool = st.sidebar.radio(
+    "Select a tool:",
+    options=[
+        "Compress Video", 
+        "Generate Subtitles", 
+        "Video Overview", 
+        "Frame-by-Frame Viewer", 
+        "Trim Video", 
+        "Crop Video", 
+        "Add Filter", 
+        "Ask Questions About Video"
+    ],
+    index=0,
+    key="sidebar-radio",
+)
+
+# Button effects for each tool
+st.sidebar.markdown("""
+    <div style="text-align: center;">
+        <button style="background-color: #5e4b8b; border-radius: 12px; padding: 10px 30px; color: white; border: none; font-size: 18px; cursor: pointer; transition: background-color 0.3s ease, transform 0.3s ease; width: 80%; margin-bottom: 15px;">
+            📦 Compress Video
+        </button>
+        <button style="background-color: #5e4b8b; border-radius: 12px; padding: 10px 30px; color: white; border: none; font-size: 18px; cursor: pointer; transition: background-color 0.3s ease, transform 0.3s ease; width: 80%; margin-bottom: 15px;">
+            📝 Generate Subtitles
+        </button>
+        <button style="background-color: #5e4b8b; border-radius: 12px; padding: 10px 30px; color: white; border: none; font-size: 18px; cursor: pointer; transition: background-color 0.3s ease, transform 0.3s ease; width: 80%; margin-bottom: 15px;">
+            🧐 Video Overview
+        </button>
+        <button style="background-color: #5e4b8b; border-radius: 12px; padding: 10px 30px; color: white; border: none; font-size: 18px; cursor: pointer; transition: background-color 0.3s ease, transform 0.3s ease; width: 80%; margin-bottom: 15px;">
+            🧡 Frame-by-Frame Viewer
+        </button>
+        <button style="background-color: #5e4b8b; border-radius: 12px; padding: 10px 30px; color: white; border: none; font-size: 18px; cursor: pointer; transition: background-color 0.3s ease, transform 0.3s ease; width: 80%; margin-bottom: 15px;">
+            ✂️ Trim Video
+        </button>
+        <button style="background-color: #5e4b8b; border-radius: 12px; padding: 10px 30px; color: white; border: none; font-size: 18px; cursor: pointer; transition: background-color 0.3s ease, transform 0.3s ease; width: 80%; margin-bottom: 15px;">
+            🖼️ Crop Video
+        </button>
+        <button style="background-color: #5e4b8b; border-radius: 12px; padding: 10px 30px; color: white; border: none; font-size: 18px; cursor: pointer; transition: background-color 0.3s ease, transform 0.3s ease; width: 80%; margin-bottom: 15px;">
+            🎰 Add Filter
+        </button>
+        <button style="background-color: #5e4b8b; border-radius: 12px; padding: 10px 30px; color: white; border: none; font-size: 18px; cursor: pointer; transition: background-color 0.3s ease, transform 0.3s ease; width: 80%; margin-bottom: 15px;">
+            💬 Ask Questions About Video
+        </button>
+    </div>
+""", unsafe_allow_html=True)
+
+
 
 # Setting up custom fonts (Montserrat)
 st.markdown(
@@ -55,25 +193,12 @@ st.markdown(
 )
 
 
-st.title("🎮 Smart Online Video Editor")
-st.markdown("Style, analyze, and understand your video – all in one place.")
 
 # Gemini API setup
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-# Sidebar options with buttons
-st.sidebar.title("🕠 Tools")
-tool = st.sidebar.radio("Choose a feature:", (
-    "Compress Video",
-    "Generate Subtitles",
-    "Video Overview",
-    "Frame-by-Frame Viewer",
-    "Trim Video",
-    "Crop Video",
-    "Add Filter",
-    "Ask Questions About Video",
-))
+
 
 # File upload with visual feedback
 uploaded_file = st.file_uploader("📄 Upload your video", type=["mp4", "mov", "avi"])
