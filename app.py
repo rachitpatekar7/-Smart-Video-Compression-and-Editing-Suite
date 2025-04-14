@@ -37,7 +37,7 @@ st.markdown(
     .tool-button {
         width: 200px;
         padding: 12px 20px;
-        background-color: #111827;
+        background-color: #132378;
         color: #ffffff;
         border: none;
         border-radius: 10px;
@@ -56,8 +56,8 @@ st.markdown(
     }
 
     .selected-button {
-        background-color: #f97316 !important;
-        color: #ffffff !important;
+        background-color: #ffffff !important;
+        color: #132378 !important;
         box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
     }
 
