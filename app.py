@@ -20,47 +20,83 @@ import tensorflow as tf
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap');
 
-    html, body, [class*="css"] {
-        font-family: 'Montserrat', sans-serif !important;
-    }
+html, body, [class*="css"] {
+    font-family: 'Montserrat', sans-serif !important;
+}
 
-    .toolbar {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-bottom: 2rem;
-    }
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
 
-    .tool-button {
-        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-        border: none;
-        color: white;
-        padding: 10px 20px;
-        font-weight: 600;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
+.tool-button {
+    flex: 1 1 220px;
+    background: linear-gradient(135deg, #1f1c2c, #928DAB);
+    border: none;
+    color: white;
+    padding: 16px 24px;
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
 
-    .tool-button:hover {
-        background: linear-gradient(135deg, #1f4037, #99f2c8);
-        color: black;
-        transform: scale(1.05);
-    }
+.tool-button::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
+    opacity: 0;
+    transition: opacity 0.5s;
+}
 
-    .selected-button {
-        background: linear-gradient(135deg, #ff4e50, #f9d423) !important;
-        color: black !important;
-    }
+.tool-button:hover::after {
+    opacity: 1;
+}
 
-    .stButton > button {
-        font-family: 'Montserrat', sans-serif;
-        font-weight: bold;
-    }
-    </style>
+.tool-button:hover {
+    background: linear-gradient(135deg, #FFDEE9, #B5FFFC);
+    color: #111;
+    transform: scale(1.07);
+}
+
+.selected-button {
+    background: linear-gradient(135deg, #ff4e50, #f9d423) !important;
+    color: black !important;
+    box-shadow: 0 0 20px rgba(249, 212, 35, 0.8);
+}
+
+.stButton > button {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    font-size: 15px;
+    border-radius: 10px;
+    padding: 12px 24px;
+    background: linear-gradient(to right, #43e97b 0%, #38f9d7 100%);
+    color: #000;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+    background: linear-gradient(to right, #38f9d7 0%, #43e97b 100%);
+    transform: scale(1.05);
+    color: #111;
+}
+</style>
+
     """,
     unsafe_allow_html=True
 )
