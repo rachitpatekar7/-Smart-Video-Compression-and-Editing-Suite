@@ -34,7 +34,7 @@ tool = st.sidebar.radio("Choose a feature:", (
     "Trim Video",
     "Crop Video",
     "Add Filter",
-    "AI Stylization",
+    "Ask Questions About Video",
 ))
 
 uploaded_file = st.file_uploader("📄 Upload your video", type=["mp4", "mov", "avi"])
