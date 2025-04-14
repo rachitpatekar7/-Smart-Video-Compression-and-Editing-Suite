@@ -20,64 +20,63 @@ import tensorflow as tf
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap');
 
-    html, body, [class*="css"] {
-        font-family: 'Montserrat', sans-serif !important;
-    }
+html, body, [class*="css"] {
+    font-family: 'Montserrat', sans-serif !important;
+}
 
-    .toolbar {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.75rem;
-        margin-top: 1rem;
-    }
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
 
-    .tool-button {
-        width: 200px;
-        padding: 12px 20px;
-        background-color: #132378;
-        color: #ffffff;
-        border: none;
-        border-radius: 10px;
-        font-size: 15px;
-        font-weight: 600;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    }
+.tool-button {
+    min-width: 250px;
+    padding: 14px 32px;
+    background-color: #111827;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
 
-    .tool-button:hover {
-        background-color: #facc15;
-        color: #111827;
-        transform: scale(1.02);
-    }
+.tool-button:hover {
+    background-color: #facc15;
+    color: #111827;
+    transform: scale(1.03);
+}
 
-    .selected-button {
-        background-color: #ffffff !important;
-        color: #030549 !important;
-        box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
-    }
+.selected-button {
+    background-color: #f97316 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
+}
 
-    .stButton > button {
-        width: 100% !important;  /* Make button fill the width of the sidebar */
-        font-family: 'Montserrat', sans-serif;
-        font-weight: bold;
-        border-radius: 10px;
-        padding: 10px 24px;
-        background-color: #030549;
-        color: #ffffff;
-        border: #ffffff;
-        transition: all 0.3s ease;
-    }
+.stButton > button {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 12px 24px;
+    background-color: #0ea5e9;
+    color: #ffffff;
+    border: none;
+    transition: all 0.3s ease;
+}
 
-    .stButton > button:hover {
-        background-color: #ffffff;
-        transform: scale(1.04);
-    }
-    </style>
+.stButton > button:hover {
+    background-color: #0369a1;
+    transform: scale(1.04);
+}
+</style>
     """,
     unsafe_allow_html=True
 )
@@ -89,7 +88,16 @@ if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
 # Toolbar options
-tools = ["Compress", "Trim", "Crop", "Subtitles", "Filters", "Overview", "Frames", "Ashton",]
+tools = [
+    "Compress Video",
+    "Generate Subtitles",
+    "Video Overview",
+    "Frame-by-Frame Viewer",
+    "Trim Video",
+    "Crop Video",
+    "Add Filter",
+    "Ask Questions About Video",
+]
 
 # Initialize session state for selected tool
 if "tool" not in st.session_state:
@@ -117,7 +125,7 @@ if uploaded_file:
 
     # Tool Logic
     tool = st.session_state.tool
-    if tool == "Compress":
+    if tool == "Compress Video":
         st.subheader("📦 Compressing your video")
         with st.spinner("Compressing using compressor.py logic..."):
             compressed_path = temp_video_path.replace(".mp4", "_compressed.mp4")
@@ -133,7 +141,7 @@ if uploaded_file:
             except Exception as e:
                 st.error(f"Compression failed: {str(e)}")
 
-    elif tool == "Subtitles":
+    elif tool == "Generate Subtitles":
         st.subheader("📝 Subtitle Generator")
         language = st.selectbox("Select language (for better accuracy):", ["en", "hi", "es", "fr", "de", "zh"])
         try:
@@ -147,7 +155,7 @@ if uploaded_file:
         except Exception as e:
             st.error(f"Subtitle generation failed: {e}")
 
-    elif tool == "Overview":
+    elif tool == "Video Overview":
         st.subheader("🧐 Video Summary")
         st.info("This feature extracts subtitles and sends them to Gemini API for summarization.")
         try:
@@ -164,7 +172,7 @@ if uploaded_file:
         except Exception as e:
             st.error(f"AI Summary failed: {e}")
 
-    elif tool == "Frames":
+    elif tool == "Frame-by-Frame Viewer":
         st.subheader("🧡 Frame Viewer")
         cap = cv2.VideoCapture(temp_video_path)
         total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -178,7 +186,7 @@ if uploaded_file:
         else:
             st.error("Failed to extract frame.")
 
-    elif tool == "Trim":
+    elif tool == "Trim Video":
         st.subheader("✂️ Trim Video")
         video = mp.VideoFileClip(temp_video_path)
         st.video(temp_video_path)
@@ -193,7 +201,7 @@ if uploaded_file:
                 st.success("✅ Trim complete")
                 st.video(trimmed_path)
 
-    elif tool == "Crop":
+    elif tool == "Crop Video":
         st.subheader("🖼️ Crop Video")
         st.video(temp_video_path)
         cap = cv2.VideoCapture(temp_video_path)
@@ -202,7 +210,7 @@ if uploaded_file:
         if ret:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image = Image.fromarray(frame)
-            st.image(image, caption="First Frame", use_container_width=True)
+            st.image(image, caption="First Frame", use_column_width=True)
             st.markdown("Specify crop coordinates:")
             x1 = st.number_input("x1", value=0, min_value=0)
             y1 = st.number_input("y1", value=0, min_value=0)
@@ -218,7 +226,7 @@ if uploaded_file:
                     st.success("✅ Cropping complete")
                     st.video(cropped_path)
 
-    elif tool == "Filters":
+    elif tool == "Add Filter":
         st.subheader("🎰 Add Video Filter")
         filter_choice = st.selectbox("Choose filter:", ["Grayscale", "Sepia", "Invert", "Brighten"])
         filtered_path = temp_video_path.replace(".mp4", f"_{filter_choice.lower()}.mp4")
@@ -244,7 +252,7 @@ if uploaded_file:
             st.success("✅ Filter applied")
             st.video(filtered_path)
 
-    elif tool == "Ashton":
+    elif tool == "Ask Questions About Video":
         st.subheader("💬 Ask Questions About Video")
         st.info("Extracting subtitles... this might take a moment.")
         try:
