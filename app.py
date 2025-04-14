@@ -192,7 +192,7 @@ if uploaded_file:
             st.info("Emotion Detection Logic Placeholder - integrate model")
 
     elif tool == "AI Stylization":
-    st.subheader("🎨 AI Stylization with Fast Neural Style Transfer")
+        st.subheader("🎨 AI Stylization with Fast Neural Style Transfer")
     style_model = st.selectbox("Choose style:", ["mosaic", "candy", "rain_princess", "udnie"])
     model_path = f"models/{style_model}.t7"
 
