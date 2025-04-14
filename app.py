@@ -6,15 +6,20 @@ import tempfile
 import subprocess
 import whisper
 import cv2
-from PIL import Image
+from PIL import Image, ImageEnhance, ImageOps
+import numpy as np
 import base64
 import moviepy.editor as mp
-from streamlit_drawable_canvas import st_canvas
 import google.generativeai as genai
 from compressor import compress_video
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input
+from tensorflow.keras.models import Model
+import tensorflow as tf
 
 st.set_page_config(page_title="✨ Smart Video Editor", layout="wide")
-st.title("🎞 Smart Online Video Editor")
+st.title("🎮 Smart Online Video Editor")
 st.markdown("Style, analyze, and understand your video – all in one place.")
 
 # Gemini API setup
@@ -30,7 +35,9 @@ tool = st.sidebar.radio("Choose a feature:", (
     "Frame-by-Frame Viewer",
     "Trim Video",
     "Crop Video",
-    "Add Filter (Grayscale)",
+    "Add Filter",
+    "Emotion Detection",
+    "AI Stylization",
 ))
 
 uploaded_file = st.file_uploader("📄 Upload your video", type=["mp4", "mov", "avi"])
@@ -63,7 +70,6 @@ if uploaded_file:
         language = st.selectbox("Select language (for better accuracy):", ["en", "hi", "es", "fr", "de", "zh"])
 
         try:
-            os.sync() if hasattr(os, "sync") else None
             model = whisper.load_model("base")
             with st.spinner("Transcribing using Whisper..."):
                 result = model.transcribe(temp_video_path, language=language)
@@ -75,7 +81,7 @@ if uploaded_file:
             st.error(f"Subtitle generation failed: {e}")
 
     elif tool == "AI Video Overview (Gemini API)":
-        st.subheader("🤖 AI Video Summary (Experimental)")
+        st.subheader("🧐 AI Video Summary (Experimental)")
         st.info("This feature extracts subtitles and sends them to Gemini API for summarization.")
 
         try:
@@ -96,7 +102,7 @@ if uploaded_file:
             st.error(f"AI Summary failed: {e}")
 
     elif tool == "Frame-by-Frame Viewer":
-        st.subheader("🧱 Frame Viewer")
+        st.subheader("🧡 Frame Viewer")
         cap = cv2.VideoCapture(temp_video_path)
         total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         idx = st.slider("Select frame index", 0, total - 1, 0)
@@ -127,53 +133,76 @@ if uploaded_file:
 
     elif tool == "Crop Video":
         st.subheader("🖼️ Crop Video")
-        st.info("Draw a rectangle on the first frame to select crop area")
-        video = mp.VideoFileClip(temp_video_path)
-        frame = video.get_frame(1)
-        frame_img = Image.fromarray(frame)
-
-        if frame_img.width > 1920:
-            resize_ratio = 1920 / frame_img.width
-            frame_img = frame_img.resize((1920, int(frame_img.height * resize_ratio)))
-
-        canvas_result = st_canvas(
-            fill_color="rgba(255, 0, 0, 0.3)",
-            stroke_width=2,
-            background_image=frame_img,
-            update_streamlit=True,
-            height=frame_img.height,
-            width=frame_img.width,
-            drawing_mode="rect",
-            key="canvas",
-        )
-
-        if canvas_result.json_data and len(canvas_result.json_data["objects"]) > 0:
-            obj = canvas_result.json_data["objects"][0]
-            x1 = int(obj["left"])
-            y1 = int(obj["top"])
-            x2 = int(x1 + obj["width"])
-            y2 = int(y1 + obj["height"])
-
-            st.write(f"Cropping rectangle: ({x1}, {y1}) to ({x2}, {y2})")
-            cropped_path = temp_video_path.replace(".mp4", "_cropped.mp4")
+        st.video(temp_video_path)
+        cap = cv2.VideoCapture(temp_video_path)
+        ret, frame = cap.read()
+        cap.release()
+        if ret:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            image = Image.fromarray(frame)
+            st.image(image, caption="First Frame", use_column_width=True)
+            st.markdown("Specify crop coordinates:")
+            x1 = st.number_input("x1", value=0, min_value=0)
+            y1 = st.number_input("y1", value=0, min_value=0)
+            x2 = st.number_input("x2", value=image.width, min_value=1)
+            y2 = st.number_input("y2", value=image.height, min_value=1)
 
             if st.button("Crop"):
                 with st.spinner("Cropping video..."):
-                    cropped = video.crop(x1=x1, y1=y1, x2=x2, y2=y2)
+                    video = mp.VideoFileClip(temp_video_path)
+                    cropped = video.crop(x1=int(x1), y1=int(y1), x2=int(x2), y2=int(y2))
+                    cropped_path = temp_video_path.replace(".mp4", "_cropped.mp4")
                     cropped.write_videofile(cropped_path, codec="libx264")
                     st.success("✅ Cropping complete")
                     st.video(cropped_path)
 
-    elif tool == "Add Filter (Grayscale)":
-        st.subheader("🎰 Add Grayscale Filter")
-        st.info("Converting video to grayscale...")
-        gray_path = temp_video_path.replace(".mp4", "_gray.mp4")
-        if st.button("Apply Grayscale"):
-            with st.spinner("Processing..."):
-                clip = mp.VideoFileClip(temp_video_path).fx(mp.vfx.blackwhite)
-                clip.write_videofile(gray_path, codec="libx264")
-                st.success("✅ Grayscale filter applied")
-                st.video(gray_path)
+    elif tool == "Add Filter":
+        st.subheader("🎰 Add Video Filter")
+        filter_choice = st.selectbox("Choose filter:", ["Grayscale", "Sepia", "Invert", "Brighten"])
+        filtered_path = temp_video_path.replace(".mp4", f"_{filter_choice.lower()}.mp4")
+
+        if st.button("Apply Filter"):
+            clip = mp.VideoFileClip(temp_video_path)
+            if filter_choice == "Grayscale":
+                clip = clip.fx(mp.vfx.blackwhite)
+            elif filter_choice == "Invert":
+                clip = clip.fl_image(lambda f: 255 - f)
+            elif filter_choice == "Sepia":
+                def sepia(img):
+                    img = np.array(img)
+                    sepia_filter = np.array([[0.393, 0.769, 0.189],
+                                             [0.349, 0.686, 0.168],
+                                             [0.272, 0.534, 0.131]])
+                    return np.clip(img.dot(sepia_filter.T), 0, 255).astype(np.uint8)
+                clip = clip.fl_image(sepia)
+            elif filter_choice == "Brighten":
+                clip = clip.fl_image(lambda f: np.clip(f * 1.2, 0, 255))
+
+            clip.write_videofile(filtered_path, codec="libx264")
+            st.success("✅ Filter applied")
+            st.video(filtered_path)
+
+    elif tool == "Emotion Detection":
+        st.subheader("😊 Emotion Detection from Frame")
+        cap = cv2.VideoCapture(temp_video_path)
+        ret, frame = cap.read()
+        cap.release()
+        if ret:
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            st.image(gray, caption="Grayscale Frame", use_column_width=True)
+            st.info("Emotion Detection Logic Placeholder - integrate model")
+
+    elif tool == "AI Stylization":
+        st.subheader("🎨 AI Stylization")
+        st.info("Applying Neural Style Transfer to the first frame of the video")
+        cap = cv2.VideoCapture(temp_video_path)
+        ret, frame = cap.read()
+        cap.release()
+        if ret:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            image = Image.fromarray(frame)
+            st.image(image, caption="Original Frame", use_column_width=True)
+            st.info("Stylization Logic Placeholder - use Fast Neural Style Transfer")
 
 else:
     st.info("👈 Upload a video to get started")
