@@ -201,7 +201,7 @@ if uploaded_file:
         if ret:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image = Image.fromarray(frame)
-            st.image(image, caption="First Frame", use_column_width=True)
+            st.image(image, caption="First Frame", use_container_width=True)
             st.markdown("Specify crop coordinates:")
             x1 = st.number_input("x1", value=0, min_value=0)
             y1 = st.number_input("y1", value=0, min_value=0)
