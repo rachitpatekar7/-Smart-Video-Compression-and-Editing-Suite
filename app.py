@@ -179,62 +179,43 @@ if uploaded_file:
             st.success("✅ Filter applied")
             st.video(filtered_path)
 
-    elif tool == "AI Stylization":
-        st.subheader("🎨 AI Stylization with Fast Neural Style Transfer")
-        style_model = st.selectbox("Choose style:", ["mosaic", "candy", "rain_princess", "udnie"])
+    elif tool == "Ask Questions About Video":
+        st.subheader("💬 Ask Questions About Video")
 
-        # Verify and show the model path
-        model_path = f"models/{style_model}.t7"
-        st.write(f"Model path: {model_path}")  # Show the model path for debugging
+        # Step 1: Extract subtitles
+        st.info("Extracting subtitles... this might take a moment.")
+        try:
+            model = whisper.load_model("base")
+            with st.spinner("Transcribing video with Whisper..."):
+                result = model.transcribe(temp_video_path)
+                transcript = result["text"]
 
-        if not os.path.exists(model_path):
-            st.error(f"Model file '{style_model}.t7' not found at the expected location.")
-        else:
-            cap = cv2.VideoCapture(temp_video_path)
-            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fps = cap.get(cv2.CAP_PROP_FPS)
+            st.text_area("Transcript:", transcript, height=200)
 
-            output_path = temp_video_path.replace(".mp4", f"_{style_model}_styled.mp4")
-            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-            out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
-
-            st.info("Applying style... this may take a minute")
-
+            # Step 2: Submit subtitles to Gemini API for processing
+            st.info("Sending transcript to Gemini API for analysis...")
             try:
-                net = cv2.dnn.readNetFromTorch(model_path)
-                frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-                progress = st.progress(0)
+                gemini_model = genai.GenerativeModel("gemini-2.0-flash")
+                gemini_response = gemini_model.generate_content(f"Analyze the following video transcript and answer questions about it:\n{transcript}")
+                st.success("✅ Transcript analysis complete.")
+                st.text_area("Gemini Analysis:", gemini_response.text, height=200)
 
-                i = 0
-                while cap.isOpened():
-                    ret, frame = cap.read()
-                    if not ret:
-                        break
+                # Step 3: Chatbot interface for questions
+                st.info("Ask a question about the video:")
+                user_question = st.text_input("Your question:")
 
-                    inp = cv2.dnn.blobFromImage(frame, 1.0, (width, height),
-                                                (103.939, 116.779, 123.68), swapRB=False, crop=False)
-                    net.setInput(inp)
-                    out_frame = net.forward()
-                    out_frame = out_frame.reshape(3, out_frame.shape[2], out_frame.shape[3])
-                    out_frame[0] += 103.939
-                    out_frame[1] += 116.779
-                    out_frame[2] += 123.68
-                    out_frame = out_frame.transpose(1, 2, 0)
-                    styled = np.clip(out_frame, 0, 255).astype('uint8')
-                    out.write(cv2.cvtColor(styled, cv2.COLOR_RGB2BGR))
+                if user_question:
+                    try:
+                        response = gemini_model.generate_content(f"Answer the following question based on the video transcript: {user_question}\nTranscript:\n{transcript}")
+                        st.success("✅ Answer generated.")
+                        st.text_area("AI's Answer:", response.text, height=150)
+                    except Exception as e:
+                        st.error(f"Error while generating the answer: {e}")
 
-                    i += 1
-                    progress.progress(i / frame_count)
-
-                cap.release()
-                out.release()
-                st.success("✅ Stylization complete")
-                st.video(output_path)
-                with open(output_path, "rb") as f:
-                    st.download_button("⬇️ Download Styled Video", f, file_name=f"{filename}_{style_model}_styled.mp4")
             except Exception as e:
-                st.error(f"Stylization failed: {str(e)}")
+                st.error(f"Error while analyzing the transcript with Gemini: {e}")
+        except Exception as e:
+            st.error(f"Error while extracting subtitles from the video: {e}")
 else:
     st.info("👈 Upload a video to get started")
 
