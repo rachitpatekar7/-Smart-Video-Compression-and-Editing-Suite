@@ -192,17 +192,55 @@ if uploaded_file:
             st.info("Emotion Detection Logic Placeholder - integrate model")
 
     elif tool == "AI Stylization":
-        st.subheader("🎨 AI Stylization")
-        st.info("Applying Neural Style Transfer to the first frame of the video")
-        cap = cv2.VideoCapture(temp_video_path)
-        ret, frame = cap.read()
-        cap.release()
-        if ret:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image = Image.fromarray(frame)
-            st.image(image, caption="Original Frame", use_column_width=True)
-            st.info("Stylization Logic Placeholder - use Fast Neural Style Transfer")
+    st.subheader("🎨 AI Stylization with Fast Neural Style Transfer")
+    style_model = st.selectbox("Choose style:", ["mosaic", "candy", "rain_princess", "udnie"])
+    model_path = f"models/{style_model}.t7"
 
+    cap = cv2.VideoCapture(temp_video_path)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+
+    output_path = temp_video_path.replace(".mp4", f"_{style_model}_styled.mp4")
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+    st.info("Applying style... this may take a minute")
+
+    try:
+        net = cv2.dnn.readNetFromTorch(model_path)
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        progress = st.progress(0)
+
+        i = 0
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            inp = cv2.dnn.blobFromImage(frame, 1.0, (width, height),
+                                        (103.939, 116.779, 123.68), swapRB=False, crop=False)
+            net.setInput(inp)
+            out_frame = net.forward()
+            out_frame = out_frame.reshape(3, out_frame.shape[2], out_frame.shape[3])
+            out_frame[0] += 103.939
+            out_frame[1] += 116.779
+            out_frame[2] += 123.68
+            out_frame = out_frame.transpose(1, 2, 0)
+            styled = np.clip(out_frame, 0, 255).astype('uint8')
+            out.write(cv2.cvtColor(styled, cv2.COLOR_RGB2BGR))
+
+            i += 1
+            progress.progress(i / frame_count)
+
+        cap.release()
+        out.release()
+        st.success("✅ Stylization complete")
+        st.video(output_path)
+        with open(output_path, "rb") as f:
+            st.download_button("⬇️ Download Styled Video", f, file_name=f"{filename}_{style_model}_styled.mp4")
+    except Exception as e:
+        st.error(f"Stylization failed: {str(e)}")
 else:
     st.info("👈 Upload a video to get started")
 
