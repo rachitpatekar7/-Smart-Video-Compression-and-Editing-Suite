@@ -16,6 +16,44 @@ from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input
 from tensorflow.keras.models import Model
 import tensorflow as tf
 
+# Setting up custom fonts (Montserrat)
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap');
+    html, body {
+        font-family: 'Montserrat', sans-serif;
+    }
+    .stButton>button {
+        background-color: #1f77b4;
+        color: white;
+        font-weight: bold;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    .stButton>button:hover {
+        transform: scale(1.05);
+        background-color: #167abc;
+    }
+    .stTextArea>textarea {
+        border-radius: 5px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+    }
+    .stSelectbox>div {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        background-color: #f8f8f8;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.set_page_config(page_title="✨ Smart Video Editor", layout="wide")
 st.title("🎮 Smart Online Video Editor")
 st.markdown("Style, analyze, and understand your video – all in one place.")
@@ -24,7 +62,7 @@ st.markdown("Style, analyze, and understand your video – all in one place.")
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-# Sidebar options
+# Sidebar options with buttons
 st.sidebar.title("🕠 Tools")
 tool = st.sidebar.radio("Choose a feature:", (
     "Compress Video",
@@ -37,6 +75,7 @@ tool = st.sidebar.radio("Choose a feature:", (
     "Ask Questions About Video",
 ))
 
+# File upload with visual feedback
 uploaded_file = st.file_uploader("📄 Upload your video", type=["mp4", "mov", "avi"])
 
 if uploaded_file:
@@ -46,6 +85,7 @@ if uploaded_file:
 
     filename = uploaded_file.name.rsplit(".", 1)[0]
 
+    # Tool Logic Section
     if tool == "Compress Video":
         st.subheader("📦 Compressing your video")
         with st.spinner("Compressing using compressor.py logic..."):
@@ -68,7 +108,7 @@ if uploaded_file:
 
         try:
             model = whisper.load_model("base")
-            with st.spinner("Transcribing using Whisper..."):
+            with st.spinner("Transcribing the Video..."):
                 result = model.transcribe(temp_video_path, language=language)
                 subtitle_text = result["text"]
             st.success("✅ Subtitles generated")
@@ -82,7 +122,7 @@ if uploaded_file:
         st.info("This feature extracts subtitles and sends them to Gemini API for summarization.")
 
         try:
-            with st.spinner("Transcribing with Whisper..."):
+            with st.spinner("Transcribing the Video..."):
                 model = whisper.load_model("base")
                 result = model.transcribe(temp_video_path)
                 transcript = result["text"]
@@ -186,14 +226,14 @@ if uploaded_file:
         st.info("Extracting subtitles... this might take a moment.")
         try:
             model = whisper.load_model("base")
-            with st.spinner("Transcribing video with Whisper..."):
+            with st.spinner("Extracting details from the video..."):
                 result = model.transcribe(temp_video_path)
                 transcript = result["text"]
 
             st.text_area("Transcript:", transcript, height=200)
 
             # Step 2: Submit subtitles to Gemini API for processing
-            st.info("Sending transcript to Gemini API for analysis...")
+            st.info("Analyzing the Video......")
             try:
                 gemini_model = genai.GenerativeModel("gemini-2.0-flash")
                 gemini_response = gemini_model.generate_content(f"Analyze the following video transcript and answer questions about it:\n{transcript}")
@@ -201,19 +241,19 @@ if uploaded_file:
                 st.text_area("Gemini Analysis:", gemini_response.text, height=200)
 
                 # Step 3: Chatbot interface for questions
-                st.info("Ask a question about the video:")
+                st.info("Ask a question to Ashton about the video:")
                 user_question = st.text_input("Your question:")
 
                 if user_question:
                     try:
                         response = gemini_model.generate_content(f"Answer the following question based on the video transcript: {user_question}\nTranscript:\n{transcript}")
                         st.success("✅ Answer generated.")
-                        st.text_area("AI's Answer:", response.text, height=150)
+                        st.text_area("Ashton:", response.text, height=150)
                     except Exception as e:
                         st.error(f"Error while generating the answer: {e}")
 
             except Exception as e:
-                st.error(f"Error while analyzing the transcript with Gemini: {e}")
+                st.error(f"Error while analyzing the transcript: {e}")
         except Exception as e:
             st.error(f"Error while extracting subtitles from the video: {e}")
 else:
