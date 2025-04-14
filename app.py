@@ -16,8 +16,7 @@ from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input
 from tensorflow.keras.models import Model
 import tensorflow as tf
 
-# Custom Bootstrap-styled button-based toolbar and font
-# Custom Bootstrap-styled button-based toolbar and font
+
 st.markdown(
     """
     <style>
@@ -83,7 +82,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("🎮 Smart Online Video Editor")
+st.title("🎥 Smart Video Compression and Editing Suite")
 st.markdown("Style, analyze, and understand your video – all in one place.")
 
 if "GEMINI_API_KEY" in st.secrets:
