@@ -66,14 +66,14 @@ st.markdown(
         font-weight: bold;
         border-radius: 10px;
         padding: 10px 24px;
-        background-color: #0ea5e9;
+        background-color: #132378;
         color: #ffffff;
         border: none;
         transition: all 0.3s ease;
     }
 
     .stButton > button:hover {
-        background-color: #0369a1;
+        background-color: #ffffff;
         transform: scale(1.04);
     }
     </style>
