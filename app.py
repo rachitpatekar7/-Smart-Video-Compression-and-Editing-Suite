@@ -104,13 +104,14 @@ if "tool" not in st.session_state:
     st.session_state.tool = tools[0]
 
 # Custom toolbar buttons
-st.markdown('<div class="toolbar">', unsafe_allow_html=True)
-cols = st.columns(len(tools))
-for i, tool in enumerate(tools):
-    btn_class = "tool-button selected-button" if tool == st.session_state.tool else "tool-button"
-    if cols[i].button(tool, key=tool):
-        st.session_state.tool = tool
-st.markdown('</div>', unsafe_allow_html=True)
+with st.sidebar:
+    st.markdown('<div class="toolbar">', unsafe_allow_html=True)
+    for tool in tools:
+        btn_class = "tool-button selected-button" if tool == st.session_state.tool else "tool-button"
+        if st.button(f"{tool}", key=tool):
+            st.session_state.tool = tool
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 # File upload
 uploaded_file = st.file_uploader("📄 Upload your video", type=["mp4", "mov", "avi"])
