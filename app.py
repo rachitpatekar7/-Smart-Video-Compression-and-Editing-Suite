@@ -31,12 +31,11 @@ st.sidebar.title("🕠 Tools")
 tool = st.sidebar.radio("Choose a feature:", (
     "Compress Video",
     "Generate Subtitles",
-    "AI Video Overview (Gemini API)",
+    "Video Overview",
     "Frame-by-Frame Viewer",
     "Trim Video",
     "Crop Video",
     "Add Filter",
-    "Emotion Detection",
     "AI Stylization",
 ))
 
@@ -80,8 +79,8 @@ if uploaded_file:
         except Exception as e:
             st.error(f"Subtitle generation failed: {e}")
 
-    elif tool == "AI Video Overview (Gemini API)":
-        st.subheader("🧐 AI Video Summary (Experimental)")
+    elif tool == "Video Overview":
+        st.subheader("🧐 Video Summary")
         st.info("This feature extracts subtitles and sends them to Gemini API for summarization.")
 
         try:
@@ -93,7 +92,7 @@ if uploaded_file:
             st.text_area("Transcript:", transcript, height=200)
 
             with st.spinner("Sending to Gemini..."):
-                gemini_model = genai.GenerativeModel("gemini-pro")
+                gemini_model = genai.GenerativeModel("gemini-2.0-flash")
                 response = gemini_model.generate_content(f"Summarize this transcript:\n{transcript}")
 
             st.success("✅ Summary generated")
