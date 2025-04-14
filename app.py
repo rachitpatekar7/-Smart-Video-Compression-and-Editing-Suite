@@ -54,7 +54,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.set_page_config(page_title="✨ Smart Video Editor", layout="wide")
+
 st.title("🎮 Smart Online Video Editor")
 st.markdown("Style, analyze, and understand your video – all in one place.")
 
