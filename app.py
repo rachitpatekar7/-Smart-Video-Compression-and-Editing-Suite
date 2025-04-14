@@ -35,68 +35,48 @@ html, body, [class*="css"] {
 }
 
 .tool-button {
-    flex: 1 1 220px;
-    background: linear-gradient(135deg, #1f1c2c, #928DAB);
+    min-width: 250px;
+    padding: 14px 32px;
+    background-color: #111827;
+    color: #ffffff;
     border: none;
-    color: white;
-    padding: 16px 24px;
-    font-weight: 700;
-    font-size: 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
     text-align: center;
-    border-radius: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    letter-spacing: 0.5px;
-    position: relative;
-    overflow: hidden;
-}
-
-.tool-button::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
-    opacity: 0;
-    transition: opacity 0.5s;
-}
-
-.tool-button:hover::after {
-    opacity: 1;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
 }
 
 .tool-button:hover {
-    background: linear-gradient(135deg, #FFDEE9, #B5FFFC);
-    color: #111;
-    transform: scale(1.07);
+    background-color: #facc15;
+    color: #111827;
+    transform: scale(1.03);
 }
 
 .selected-button {
-    background: linear-gradient(135deg, #ff4e50, #f9d423) !important;
-    color: black !important;
-    box-shadow: 0 0 20px rgba(249, 212, 35, 0.8);
+    background-color: #f97316 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
 }
 
 .stButton > button {
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
-    font-size: 15px;
     border-radius: 10px;
     padding: 12px 24px;
-    background: linear-gradient(to right, #43e97b 0%, #38f9d7 100%);
-    color: #000;
+    background-color: #0ea5e9;
+    color: #ffffff;
     border: none;
     transition: all 0.3s ease;
 }
 
 .stButton > button:hover {
-    background: linear-gradient(to right, #38f9d7 0%, #43e97b 100%);
-    transform: scale(1.05);
-    color: #111;
+    background-color: #0369a1;
+    transform: scale(1.04);
 }
 </style>
-
     """,
     unsafe_allow_html=True
 )
