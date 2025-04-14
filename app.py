@@ -105,22 +105,6 @@ st.markdown("""
 st.sidebar.title("✨ Smart Video Editor")
 st.sidebar.markdown('<div class="sidebar-title">Choose a feature:</div>', unsafe_allow_html=True)
 
-# Button selection for features
-tool = st.sidebar.radio(
-    "Select a tool:",
-    options=[
-        "Compress Video", 
-        "Generate Subtitles", 
-        "Video Overview", 
-        "Frame-by-Frame Viewer", 
-        "Trim Video", 
-        "Crop Video", 
-        "Add Filter", 
-        "Ask Questions About Video"
-    ],
-    index=0,
-    key="sidebar-radio",
-)
 
 # Button effects for each tool
 st.sidebar.markdown("""
