@@ -267,7 +267,6 @@ if uploaded_file:
                 gemini_model = genai.GenerativeModel("gemini-2.0-flash")
                 gemini_response = gemini_model.generate_content(f"Analyze the following video transcript and answer questions about it:\n{transcript}")
                 st.success("✅ Transcript analysis complete.")
-                st.text_area("Gemini Analysis:", gemini_response.text, height=200)
                 st.info("Ask a question to Ashton about the video:")
                 user_question = st.text_input("Your question:")
                 if user_question:
