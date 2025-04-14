@@ -62,6 +62,7 @@ st.markdown(
     }
 
     .stButton > button {
+        width: 100% !important;  /* Make button fill the width of the sidebar */
         font-family: 'Montserrat', sans-serif;
         font-weight: bold;
         border-radius: 10px;
