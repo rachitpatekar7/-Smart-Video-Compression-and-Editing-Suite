@@ -160,11 +160,11 @@ if uploaded_file:
         st.subheader("🧐 Video Summary")
         st.info("This feature extracts subtitles and sends them to Gemini API for summarization.")
         try:
-            with st.spinner("Transcribing the Video..."):
+            with st.spinner("Analyzing the Video..."):
                 model = whisper.load_model("base")
                 result = model.transcribe(temp_video_path)
                 transcript = result["text"]
-            st.text_area("Transcript:", transcript, height=200)
+            
             with st.spinner("Sending to Gemini..."):
                 gemini_model = genai.GenerativeModel("gemini-2.0-flash")
                 response = gemini_model.generate_content(f"Summarize this transcript:\n{transcript}")
@@ -255,7 +255,7 @@ if uploaded_file:
 
     elif tool == "Ask Questions About Video":
         st.subheader("💬 Ask Questions About Video")
-        st.info("Extracting subtitles... this might take a moment.")
+        st.info("Processing the video... this might take a moment.")
         try:
             model = whisper.load_model("base")
             with st.spinner("Extracting details from the video..."):
