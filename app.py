@@ -254,31 +254,44 @@ if uploaded_file:
             st.video(filtered_path)
 
     elif tool == "Ask Questions About Video":
-        st.subheader("💬 Ask Questions About Video")
+    st.subheader("💬 Ask Questions About Video")
+
+    # Load transcript only once
+    if "video_transcript" not in st.session_state:
         st.info("Processing the video... this might take a moment.")
         try:
             model = whisper.load_model("base")
-            with st.spinner("Extracting details from the video..."):
+            with st.spinner("Extracting transcript from the video..."):
                 result = model.transcribe(temp_video_path)
-                transcript = result["text"]
-            st.info("Analyzing the Video......")
-            try:
-                gemini_model = genai.GenerativeModel("gemini-2.0-flash")
-                gemini_response = gemini_model.generate_content(f"Analyze the following video transcript and answer questions about it:\n{transcript}")
-                st.success("✅ Transcript analysis complete.")
-                st.info("Ask a question to Ashton about the video:")
-                user_question = st.text_input("Your question:")
-                if user_question:
-                    try:
-                        response = gemini_model.generate_content(f"Answer the following question based on the video transcript: {user_question}\nTranscript:\n{transcript}")
-                        st.success("✅ Answer generated.")
-                        st.text_area("Ashton:", response.text, height=150)
-                    except Exception as e:
-                        st.error(f"Error while generating the answer: {e}")
-            except Exception as e:
-                st.error(f"Error while analyzing the transcript: {e}")
+                st.session_state.video_transcript = result["text"]
+                st.success("✅ Transcript extraction complete.")
         except Exception as e:
-            st.error(f"Error while extracting subtitles from the video: {e}")
+            st.error(f"Error while extracting subtitles: {e}")
+            st.stop()
+
+    transcript = st.session_state.video_transcript
+
+    # Initialize Gemini model once
+    if "gemini_model" not in st.session_state:
+        try:
+            st.session_state.gemini_model = genai.GenerativeModel("gemini-2.0-flash")
+        except Exception as e:
+            st.error(f"Error initializing Gemini model: {e}")
+            st.stop()
+
+    st.info("Ask a question to Ashton about the video:")
+    user_question = st.text_input("Your question:")
+
+    if user_question:
+        try:
+            response = st.session_state.gemini_model.generate_content(
+                f"Answer the following question based on the video transcript:\nQuestion: {user_question}\nTranscript:\n{transcript}"
+            )
+            st.success("✅ Answer generated.")
+            st.text_area("Ashton:", response.text, height=150)
+        except Exception as e:
+            st.error(f"Error generating answer: {e}")
+
 else:
     st.info("👈 Upload a video to get started")
 
