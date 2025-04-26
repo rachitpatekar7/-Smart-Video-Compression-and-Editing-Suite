@@ -16,16 +16,13 @@ from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input
 from tensorflow.keras.models import Model
 import tensorflow as tf
 
-
 st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap');
-
     html, body, [class*="css"] {
         font-family: 'Montserrat', sans-serif !important;
     }
-
     .toolbar {
         display: flex;
         flex-direction: column;
@@ -33,7 +30,6 @@ st.markdown(
         gap: 0.75rem;
         margin-top: 1rem;
     }
-
     .tool-button {
         width: 200px;
         padding: 12px 20px;
@@ -48,21 +44,18 @@ st.markdown(
         transition: all 0.3s ease;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
-
     .tool-button:hover {
         background-color: #facc15;
         color: #111827;
         transform: scale(1.02);
     }
-
     .selected-button {
         background-color: #ffffff !important;
         color: #030549 !important;
         box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
     }
-
     .stButton > button {
-        width: 100% !important;  /* Make button fill the width of the sidebar */
+        width: 100% !important;
         font-family: 'Montserrat', sans-serif;
         font-weight: bold;
         border-radius: 10px;
@@ -72,7 +65,6 @@ st.markdown(
         border: #ffffff;
         transition: all 0.3s ease;
     }
-
     .stButton > button:hover {
         background-color: #ffffff;
         transform: scale(1.04);
@@ -88,7 +80,6 @@ st.markdown("Style, analyze, and understand your video – all in one place.")
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-# Toolbar options
 tools = [
     "Compress Video",
     "Generate Subtitles",
@@ -100,11 +91,9 @@ tools = [
     "Ask Questions About Video",
 ]
 
-# Initialize session state for selected tool
 if "tool" not in st.session_state:
     st.session_state.tool = tools[0]
 
-# Custom toolbar buttons
 with st.sidebar:
     st.markdown('<div class="toolbar">', unsafe_allow_html=True)
     for tool in tools:
@@ -113,8 +102,6 @@ with st.sidebar:
             st.session_state.tool = tool
     st.markdown('</div>', unsafe_allow_html=True)
 
-
-# File upload
 uploaded_file = st.file_uploader("📄 Upload your video", type=["mp4", "mov", "avi"])
 
 if uploaded_file:
@@ -124,7 +111,6 @@ if uploaded_file:
 
     filename = uploaded_file.name.rsplit(".", 1)[0]
 
-    # Tool Logic
     tool = st.session_state.tool
     if tool == "Compress Video":
         st.subheader("📦 Compressing your video")
@@ -254,44 +240,41 @@ if uploaded_file:
             st.video(filtered_path)
 
     elif tool == "Ask Questions About Video":
-    st.subheader("💬 Ask Questions About Video")
+        st.subheader("💬 Ask Questions About Video")
 
-    # Load transcript only once
-    if "video_transcript" not in st.session_state:
-        st.info("Processing the video... this might take a moment.")
-        try:
-            model = whisper.load_model("base")
-            with st.spinner("Extracting transcript from the video..."):
-                result = model.transcribe(temp_video_path)
-                st.session_state.video_transcript = result["text"]
-                st.success("✅ Transcript extraction complete.")
-        except Exception as e:
-            st.error(f"Error while extracting subtitles: {e}")
-            st.stop()
+        if "video_transcript" not in st.session_state:
+            st.info("Processing the video... this might take a moment.")
+            try:
+                model = whisper.load_model("base")
+                with st.spinner("Extracting transcript from the video..."):
+                    result = model.transcribe(temp_video_path)
+                    st.session_state.video_transcript = result["text"]
+                    st.success("✅ Transcript extraction complete.")
+            except Exception as e:
+                st.error(f"Error while extracting subtitles: {e}")
+                st.stop()
 
-    transcript = st.session_state.video_transcript
+        transcript = st.session_state.video_transcript
 
-    # Initialize Gemini model once
-    if "gemini_model" not in st.session_state:
-        try:
-            st.session_state.gemini_model = genai.GenerativeModel("gemini-2.0-flash")
-        except Exception as e:
-            st.error(f"Error initializing Gemini model: {e}")
-            st.stop()
+        if "gemini_model" not in st.session_state:
+            try:
+                st.session_state.gemini_model = genai.GenerativeModel("gemini-2.0-flash")
+            except Exception as e:
+                st.error(f"Error initializing Gemini model: {e}")
+                st.stop()
 
-    st.info("Ask a question to Ashton about the video:")
-    user_question = st.text_input("Your question:")
+        st.info("Ask a question to Ashton about the video:")
+        user_question = st.text_input("Your question:")
 
-    if user_question:
-        try:
-            response = st.session_state.gemini_model.generate_content(
-                f"Answer the following question based on the video transcript:\nQuestion: {user_question}\nTranscript:\n{transcript}"
-            )
-            st.success("✅ Answer generated.")
-            st.text_area("Ashton:", response.text, height=150)
-        except Exception as e:
-            st.error(f"Error generating answer: {e}")
-
+        if user_question:
+            try:
+                response = st.session_state.gemini_model.generate_content(
+                    f"Answer the following question based on the video transcript:\nQuestion: {user_question}\nTranscript:\n{transcript}"
+                )
+                st.success("✅ Answer generated.")
+                st.text_area("Ashton:", response.text, height=150)
+            except Exception as e:
+                st.error(f"Error generating answer: {e}")
 else:
     st.info("👈 Upload a video to get started")
 
